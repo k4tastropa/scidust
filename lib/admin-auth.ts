@@ -95,12 +95,8 @@ async function getClientIdentifier() {
   return createHash("sha256").update(clientAddress).digest("hex")
 }
 
-async function recordFailure(identifier: string, previousFailures: number) {
-  const failureCount = previousFailures + 1
-  const lockedUntil =
-    failureCount >= MAX_LOGIN_FAILURES
-      ? new Date(Date.now() + LOCK_DURATION_MS).toISOString()
-      : null
+async function recordFailure(identifier: string) {
+  const lockedUntil = new Date(Date.now() + LOCK_DURATION_MS).toISOString()
 
   await sql`
     INSERT INTO admin_login_attempts (
@@ -109,10 +105,22 @@ async function recordFailure(identifier: string, previousFailures: number) {
       locked_until,
       updated_at
     )
-    VALUES (${identifier}, ${failureCount}, ${lockedUntil}, NOW())
+    VALUES (${identifier}, 1, NULL, NOW())
     ON CONFLICT (identifier) DO UPDATE SET
-      failure_count = EXCLUDED.failure_count,
-      locked_until = EXCLUDED.locked_until,
+      failure_count = CASE
+        WHEN admin_login_attempts.locked_until IS NOT NULL
+          AND admin_login_attempts.locked_until <= NOW()
+          THEN 1
+        ELSE admin_login_attempts.failure_count + 1
+      END,
+      locked_until = CASE
+        WHEN admin_login_attempts.locked_until IS NOT NULL
+          AND admin_login_attempts.locked_until <= NOW()
+          THEN NULL
+        WHEN admin_login_attempts.failure_count + 1 >= ${MAX_LOGIN_FAILURES}
+          THEN ${lockedUntil}
+        ELSE NULL
+      END,
       updated_at = NOW()
   `
 }
@@ -134,7 +142,7 @@ export async function authenticateAdmin(username: string, password: string) {
   const valid = username === credential.username && passwordMatches
 
   if (!valid) {
-    await recordFailure(identifier, attempt?.failure_count ?? 0)
+    await recordFailure(identifier)
     return { ok: false, reason: "invalid" as const }
   }
 
@@ -204,7 +212,14 @@ export async function requireAdmin() {
 export async function destroyAdminSession() {
   const cookieStore = await cookies()
 
-  cookieStore.delete(SESSION_COOKIE)
+  cookieStore.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+  })
 }
 
 export async function updateAdminPassword(
@@ -228,10 +243,12 @@ export async function updateAdminPassword(
   }
 
   const passwordHash = await hash(nextPassword, 12)
+  const sessionSecret = randomBytes(32).toString("base64url")
   const [updated] = (await sql`
     UPDATE admin_credentials
     SET
       password_hash = ${passwordHash},
+      session_secret = ${sessionSecret},
       session_version = session_version + 1,
       updated_at = NOW()
     WHERE username = ${credential.username}
