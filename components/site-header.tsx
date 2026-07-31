@@ -9,7 +9,7 @@ const navigation = [
 
 export function SiteHeader() {
   return (
-    <header className="relative z-20 overflow-hidden border-b border-foreground/65 bg-background text-foreground">
+    <header className="relative z-20 overflow-hidden border-b border-[#75d9d3]/60 bg-[#051519] text-[#e2fffb]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 [background-image:linear-gradient(90deg,transparent_49.8%,currentColor_50%,transparent_50.2%)] [background-size:9px_100%] opacity-10"
@@ -20,7 +20,7 @@ export function SiteHeader() {
       >
         <Link
           href="/"
-          className="group relative flex min-h-20 touch-manipulation items-center overflow-hidden border-b border-foreground/65 bg-primary px-5 py-3 text-primary-foreground transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset md:min-h-32 md:border-b-0 md:px-8 md:py-4"
+          className="group relative flex min-h-20 touch-manipulation items-center overflow-hidden border-b border-[#75d9d3]/60 bg-[#12c9c5] px-5 py-3 text-[#051519] transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#e2fffb] focus-visible:ring-inset md:min-h-32 md:border-b-0 md:px-8 md:py-4"
           aria-label="SCIDUST, home"
         >
           <span
@@ -49,7 +49,7 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               aria-current={item.href === "/" ? "page" : undefined}
-              className="group relative flex min-h-14 touch-manipulation items-center justify-center overflow-hidden border-r border-foreground/65 px-2 py-2 transition-colors duration-200 outline-none last:border-r-0 hover:bg-primary hover:text-primary-foreground focus-visible:bg-primary focus-visible:text-primary-foreground focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset md:min-h-32 md:min-w-28 md:flex-col md:items-stretch md:justify-between md:px-5 md:py-5"
+              className="group relative flex min-h-14 touch-manipulation items-center justify-center overflow-hidden border-r border-[#75d9d3]/60 px-2 py-2 transition-colors duration-200 outline-none last:border-r-0 hover:bg-[#12c9c5] hover:text-[#051519] focus-visible:bg-[#12c9c5] focus-visible:text-[#051519] focus-visible:ring-2 focus-visible:ring-[#e2fffb] focus-visible:ring-inset md:min-h-32 md:min-w-28 md:flex-col md:items-stretch md:justify-between md:px-5 md:py-5"
             >
               <span className="hidden font-mono text-[9px] tracking-[0.14em] opacity-55 md:block">
                 {item.index}
@@ -59,7 +59,7 @@ export function SiteHeader() {
               </span>
               <span
                 aria-hidden="true"
-                className="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-[width] duration-200 group-hover:w-full group-focus-visible:w-full"
+                className="absolute bottom-0 left-0 h-1 w-0 bg-[#f4988f] transition-[width] duration-200 group-hover:w-full group-focus-visible:w-full"
               />
             </Link>
           ))}
