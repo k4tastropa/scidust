@@ -1,7 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
 
-export default function Page() {
+import { getArtworks } from "@/lib/artwork"
+
+export default async function Page() {
+  const artworks = await getArtworks()
+  const artwork58 = artworks.find((artwork) => artwork.id === 58)
+  const artwork52 = artworks.find((artwork) => artwork.id === 52)
+  const artwork41 = artworks.find((artwork) => artwork.id === 41)
+
+  if (!artwork58 || !artwork52 || !artwork41) {
+    throw new Error("Homepage artwork is missing from the archive.")
+  }
+
   return (
     <main id="content" className="bg-[#051519] text-[#e2fffb]">
       <section
@@ -10,7 +21,7 @@ export default function Page() {
       >
         <div className="absolute inset-y-0 right-0 left-0 md:left-[31%]">
           <Image
-            src="/artwork/58/1.jpg"
+            src={artwork58.images[0].src}
             alt="A luminous cybernetic figure with glass-like facial fragments and electric cyan hair."
             fill
             priority
@@ -82,7 +93,7 @@ export default function Page() {
       >
         <div className="absolute inset-y-0 right-0 left-0 md:[mask-image:linear-gradient(90deg,#000_0%,#000_42%,rgba(0,0,0,0.78)_56%,transparent_82%)]">
           <Image
-            src="/artwork/52/1.jpg"
+            src={artwork52.images[0].src}
             alt="Three biomechanical figures gathered in teal underwater light."
             fill
             sizes="100vw"
@@ -190,7 +201,7 @@ export default function Page() {
       >
         <div className="absolute inset-y-0 right-0 left-0 md:left-[34%] md:[mask-image:linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.68)_24%,#000_50%,#000_100%)]">
           <Image
-            src="/artwork/41/1.jpg"
+            src={artwork41.images[0].src}
             alt="A silver haired figure with closed eyes, intricate gold adornments, and a ceremonial metal crown."
             fill
             sizes="(min-width: 768px) 66vw, 100vw"

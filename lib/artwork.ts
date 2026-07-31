@@ -1,19 +1,5 @@
-import { access, readFile, readdir } from "node:fs/promises"
-import path from "node:path"
+import { neon } from "@neondatabase/serverless"
 import { cache } from "react"
-
-type ArtworkMetadata = {
-  id: number
-  title: string
-  description: string
-  date: string
-  images: Array<{
-    file: string
-    alt: string
-    width: number
-    height: number
-  }>
-}
 
 export type Artwork = {
   id: number
@@ -27,8 +13,6 @@ export type Artwork = {
     height: number
   }>
 }
-
-const artworkDirectory = path.join(process.cwd(), "public", "artwork")
 
 function descriptionExcerpt(description: string) {
   const lines = description
@@ -45,57 +29,85 @@ function descriptionExcerpt(description: string) {
   return lines[0]?.replace(/\s+/g, " ") || "Untitled signal"
 }
 
-async function fileExists(filePath: string) {
-  try {
-    await access(filePath)
-    return true
-  } catch {
-    return false
+function yearFromDate(value: Date | string | null) {
+  if (!value) {
+    return "Undated"
   }
+
+  return value instanceof Date
+    ? String(value.getUTCFullYear())
+    : value.slice(0, 4)
 }
 
-export const getArtworks = cache(async (): Promise<Artwork[]> => {
-  const entries = await readdir(artworkDirectory, { withFileTypes: true })
-  const folders = entries.filter(
-    (entry) => entry.isDirectory() && /^\d+$/.test(entry.name)
-  )
+type ArtworkRow = {
+  archive_number: number
+  title: string
+  description: string
+  published_at: Date | string | null
+}
 
-  const artworks = await Promise.all(
-    folders.map(async (folder) => {
-      const directory = path.join(artworkDirectory, folder.name)
-      const metadata = JSON.parse(
-        await readFile(path.join(directory, "artwork.json"), "utf8")
-      ) as ArtworkMetadata
-      const images = (
-        await Promise.all(
-          metadata.images.map(async (image) => {
-            const exists = await fileExists(path.join(directory, image.file))
+type ArtworkImageRow = {
+  artwork_number: number
+  url: string
+  alt: string
+  width: number
+  height: number
+}
 
-            return exists
-              ? {
-                  src: `/artwork/${folder.name}/${image.file}`,
-                  alt: image.alt,
-                  width: image.width,
-                  height: image.height,
-                }
-              : null
-          })
-        )
-      ).filter((image): image is NonNullable<typeof image> => image !== null)
+async function getBlobArtworks(): Promise<Artwork[]> {
+  const databaseUrl = process.env.DATABASE_URL
 
-      return {
-        id: metadata.id,
-        title:
-          metadata.title.trim() ||
-          `Signal ${String(metadata.id).padStart(2, "0")}`,
-        description: descriptionExcerpt(metadata.description),
-        year: metadata.date.slice(0, 4),
-        images,
-      }
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL is required to load the artwork archive."
+    )
+  }
+
+  const sql = neon(databaseUrl)
+  const [artworkRows, imageRows] = (await Promise.all([
+    sql`
+      SELECT archive_number, title, description, published_at
+      FROM artworks
+      WHERE status = 'published'
+      ORDER BY sort_order DESC, archive_number DESC
+    `,
+    sql`
+      SELECT
+        artworks.archive_number AS artwork_number,
+        artwork_images.url,
+        artwork_images.alt,
+        artwork_images.width,
+        artwork_images.height
+      FROM artwork_images
+      INNER JOIN artworks ON artworks.id = artwork_images.artwork_id
+      WHERE artworks.status = 'published'
+      ORDER BY artworks.sort_order DESC, artworks.archive_number DESC, artwork_images.position ASC
+    `,
+  ])) as [ArtworkRow[], ArtworkImageRow[]]
+  const imagesByArtwork = new Map<number, Artwork["images"]>()
+
+  for (const image of imageRows) {
+    const images = imagesByArtwork.get(image.artwork_number) ?? []
+    images.push({
+      src: image.url,
+      alt: image.alt,
+      width: image.width,
+      height: image.height,
     })
-  )
+    imagesByArtwork.set(image.artwork_number, images)
+  }
 
-  return artworks
+  return artworkRows
+    .map((artwork) => ({
+      id: artwork.archive_number,
+      title:
+        artwork.title.trim() ||
+        `Signal ${String(artwork.archive_number).padStart(2, "0")}`,
+      description: descriptionExcerpt(artwork.description),
+      year: yearFromDate(artwork.published_at),
+      images: imagesByArtwork.get(artwork.archive_number) ?? [],
+    }))
     .filter((artwork) => artwork.images.length > 0)
-    .sort((first, second) => second.id - first.id)
-})
+}
+
+export const getArtworks = cache(getBlobArtworks)

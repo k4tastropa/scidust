@@ -1,18 +1,31 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 
+import { getArtworks } from "@/lib/artwork"
+import { getContactSettings } from "@/lib/site-settings"
+
 export const metadata: Metadata = {
   title: "Contact | SCIDUST",
   description: "Contact SCIDUST on Instagram or by email.",
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const [artworks, contact] = await Promise.all([
+    getArtworks(),
+    getContactSettings(),
+  ])
+  const artwork30 = artworks.find((artwork) => artwork.id === 30)
+
+  if (!artwork30) {
+    throw new Error("Contact artwork is missing from the archive.")
+  }
+
   return (
     <main id="content" className="bg-[#050505] text-[#effffd]">
       <section className="relative isolate min-h-[calc(100svh-15rem)] overflow-hidden md:min-h-[calc(100svh-8rem)]">
         <div className="absolute top-0 right-0 left-0 h-[60svh] md:inset-y-0 md:right-[34%] md:h-auto">
           <Image
-            src="/artwork/30/1.jpg"
+            src={artwork30.images[0].src}
             alt="A cybernetic figure in profile facing toward the contact channels."
             fill
             priority
@@ -53,7 +66,7 @@ export default function ContactPage() {
 
             <div className="mt-9 border-t border-[#a7e5df]/35">
               <a
-                href="https://www.instagram.com/scidust9/"
+                href={contact.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="group flex min-h-18 items-center justify-between gap-4 border-b border-[#a7e5df]/35 py-4 transition-colors duration-200 outline-none hover:text-[#f4988f] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:ring-inset motion-reduce:transition-none"
@@ -63,7 +76,9 @@ export default function ContactPage() {
                     Instagram
                   </span>
                   <span className="font-display mt-1 block text-[clamp(1.9rem,3vw,3.1rem)] leading-none tracking-[-0.05em]">
-                    @scidust9
+                    {contact.instagramUrl
+                      .replace(/^https?:\/\/(www\.)?instagram\.com\//, "@")
+                      .replace(/\/$/, "")}
                   </span>
                 </span>
                 <svg
@@ -82,7 +97,7 @@ export default function ContactPage() {
               </a>
 
               <a
-                href="mailto:contact@scidust.com"
+                href={`mailto:${contact.contactEmail}`}
                 className="group flex min-h-18 items-center justify-between gap-4 border-b border-[#a7e5df]/35 py-4 transition-colors duration-200 outline-none hover:text-[#f4988f] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:ring-inset motion-reduce:transition-none"
               >
                 <span>
@@ -90,7 +105,7 @@ export default function ContactPage() {
                     Email
                   </span>
                   <span className="font-display mt-1 block text-[clamp(1.7rem,2.45vw,2.7rem)] leading-[0.92] tracking-[-0.05em] break-all">
-                    contact@scidust.com
+                    {contact.contactEmail}
                   </span>
                 </span>
                 <svg

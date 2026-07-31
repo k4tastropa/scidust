@@ -10,13 +10,18 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "artwork:organize": "node scripts/organize-artwork.mjs"
+    "artwork:organize": "node scripts/organize-artwork.mjs",
+    "admin:setup": "node --env-file=.env.local scripts/setup-admin-schema.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@neondatabase/serverless": "^1.1.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@vercel/blob": "^2.6.1",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jose": "^6.2.5",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
