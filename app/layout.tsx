@@ -2,6 +2,7 @@ import { Geist, IBM_Plex_Mono } from "next/font/google"
 import localFont from "next/font/local"
 
 import "./globals.css"
+import { SiteFooter } from "@/components/site-footer"
 import { SiteHeader } from "@/components/site-header"
 import { cn } from "@/lib/utils"
 
@@ -54,6 +55,7 @@ export default function RootLayout({
         </a>
         <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   )
