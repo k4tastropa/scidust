@@ -14,7 +14,7 @@ export default async function ContactPage() {
   return (
     <main id="content" className="bg-[#050505] text-[#effffd]">
       <section className="relative isolate overflow-hidden bg-[#050505] md:min-h-[calc(100svh-8rem)]">
-        <div className="relative h-[62svh] md:absolute md:inset-y-0 md:right-[34%] md:left-0 md:h-auto">
+        <div className="relative h-[62svh] md:absolute md:inset-y-0 md:right-[34%] md:left-0 md:h-auto md:-translate-x-[14%]">
           <Image
             src="/04.png"
             alt="A cybernetic figure in profile facing toward the contact channels."
