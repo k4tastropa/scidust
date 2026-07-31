@@ -106,14 +106,14 @@ export function NewArtworkForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="grid gap-4">
+    <form ref={formRef} onSubmit={onSubmit} className="grid gap-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 font-mono text-[10px] tracking-[0.14em] text-[#a7e5df] uppercase">
           Title
           <input
             name="title"
             maxLength={160}
-            className="h-11 border border-[#a7e5df]/35 bg-transparent px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df]"
+            className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
             placeholder="Optional signal name"
           />
         </label>
@@ -122,7 +122,7 @@ export function NewArtworkForm() {
           <input
             name="publishedAt"
             type="date"
-            className="h-11 border border-[#a7e5df]/35 bg-transparent px-3 font-mono text-xs tracking-normal text-[#effffd] outline-none focus:border-[#a7e5df]"
+            className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-mono text-xs tracking-normal text-[#effffd] outline-none focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
           />
         </label>
       </div>
@@ -132,7 +132,7 @@ export function NewArtworkForm() {
           name="description"
           maxLength={5000}
           rows={5}
-          className="resize-y border border-[#a7e5df]/35 bg-transparent p-3 font-sans text-sm leading-relaxed tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df]"
+          className="resize-y border border-[#a7e5df]/35 bg-[#061111] p-3 font-sans text-sm leading-relaxed tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
           placeholder="The words that travel with this work."
         />
       </label>
@@ -144,19 +144,22 @@ export function NewArtworkForm() {
           accept="image/jpeg,image/png,image/webp"
           multiple
           required
-          className="min-h-12 border border-dashed border-[#a7e5df]/45 bg-[#a7e5df]/5 px-3 py-2 font-mono text-[10px] tracking-[0.06em] text-[#a7e5df] file:mr-4 file:border-0 file:bg-[#a7e5df] file:px-3 file:py-2 file:font-mono file:text-[10px] file:tracking-[0.12em] file:text-[#061413] file:uppercase hover:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:outline-none"
+          className="min-h-14 border border-dashed border-[#a7e5df]/45 bg-[#061111] px-3 py-2 font-mono text-[10px] tracking-[0.06em] text-[#a7e5df] file:mr-4 file:border-0 file:bg-[#a7e5df] file:px-3 file:py-2 file:font-mono file:text-[10px] file:tracking-[0.12em] file:text-[#061413] file:uppercase hover:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:outline-none"
         />
       </label>
       <div className="flex flex-wrap items-center gap-4 pt-1">
         <button
           type="submit"
           disabled={isSaving}
-          className="min-h-11 bg-[#a7e5df] px-4 font-mono text-[10px] tracking-[0.15em] text-[#061413] uppercase transition-colors hover:bg-[#effffd] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
+          className="min-h-12 touch-manipulation bg-[#a7e5df] px-4 font-mono text-[10px] tracking-[0.15em] text-[#061413] uppercase transition-colors hover:bg-[#effffd] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061111] focus-visible:outline-none disabled:cursor-wait disabled:opacity-60"
         >
           {isSaving ? "Sending" : "Add to archive"}
         </button>
         {status ? (
-          <p aria-live="polite" className="font-mono text-[10px] tracking-[0.06em] text-[#a7e5df]/70">
+          <p
+            aria-live="polite"
+            className="font-mono text-[10px] tracking-[0.06em] text-[#a7e5df]/70"
+          >
             {status}
           </p>
         ) : null}

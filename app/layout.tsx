@@ -3,7 +3,6 @@ import localFont from "next/font/local"
 
 import "./globals.css"
 import { SiteHeader } from "@/components/site-header"
-import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
 const fontSans = Geist({
@@ -42,7 +41,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={cn(
         "antialiased",
         fontSans.variable,
@@ -51,13 +49,11 @@ export default function RootLayout({
       )}
     >
       <body className="font-sans">
-        <ThemeProvider>
-          <a className="skip-link" href="#content">
-            Skip to content
-          </a>
-          <SiteHeader />
-          {children}
-        </ThemeProvider>
+        <a className="skip-link" href="#content">
+          Skip to content
+        </a>
+        <SiteHeader />
+        {children}
       </body>
     </html>
   )
