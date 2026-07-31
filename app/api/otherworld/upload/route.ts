@@ -8,7 +8,8 @@ export const runtime = "nodejs"
 
 function isSameOrigin(request: Request) {
   const origin = request.headers.get("origin")
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host")
+  const host =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host")
 
   if (!origin || !host) {
     return false
@@ -43,12 +44,12 @@ export async function POST(request: Request) {
       const payload = JSON.parse(clientPayload) as { artworkId?: unknown }
       const artworkId = Number(payload.artworkId)
       if (!Number.isSafeInteger(artworkId) || artworkId < 1) {
-        throw new Error("Invalid artwork draft.")
+        throw new Error("Invalid artwork.")
       }
 
       const [artwork] = (await sql`
         SELECT id, archive_number FROM artworks
-        WHERE id = ${artworkId} AND status = 'draft'
+        WHERE id = ${artworkId} AND status IN ('draft', 'published')
       `) as Array<{ id: number; archive_number: number }>
       const expectedPrefix = `artwork/upload/${artwork?.archive_number}/`
 
@@ -58,7 +59,6 @@ export async function POST(request: Request) {
 
       return {
         allowedContentTypes: ["image/jpeg", "image/png", "image/webp"],
-        maximumSizeInBytes: 12 * 1024 * 1024,
         addRandomSuffix: true,
         validUntil: Date.now() + 10 * 60 * 1000,
         tokenPayload: clientPayload,

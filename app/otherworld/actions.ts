@@ -13,7 +13,6 @@ import {
 } from "@/lib/admin-auth"
 import { sql } from "@/lib/database"
 
-const MAX_DESCRIPTION_LENGTH = 5000
 const MAX_TITLE_LENGTH = 160
 
 function value(formData: FormData, key: string) {
@@ -39,7 +38,12 @@ export async function loginAction(formData: FormData) {
   const username = value(formData, "username")
   const password = value(formData, "password")
 
-  if (!username || !password || username.length > 160 || password.length > 256) {
+  if (
+    !username ||
+    !password ||
+    username.length > 160 ||
+    password.length > 256
+  ) {
     redirect("/otherworld/login?error=1")
   }
 
@@ -62,11 +66,9 @@ export async function updateContactAction(formData: FormData) {
   await requireAdmin()
   const email = value(formData, "email")
   const instagramUrl = value(formData, "instagramUrl")
+  const behanceUrl = value(formData, "behanceUrl")
 
-  if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-    email.length > 254
-  ) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
     redirect("/otherworld?contactError=1")
   }
 
@@ -83,10 +85,24 @@ export async function updateContactAction(formData: FormData) {
     redirect("/otherworld?contactError=1")
   }
 
+  try {
+    const url = new URL(behanceUrl)
+    const host = url.hostname.toLowerCase()
+    if (
+      url.protocol !== "https:" ||
+      (host !== "behance.net" && host !== "www.behance.net")
+    ) {
+      throw new Error("Invalid Behance URL")
+    }
+  } catch {
+    redirect("/otherworld?contactError=1")
+  }
+
   await sql`
     INSERT INTO site_settings (key, value, updated_at)
     VALUES
       ('instagram_url', ${instagramUrl}, NOW()),
+      ('behance_url', ${behanceUrl}, NOW()),
       ('contact_email', ${email}, NOW())
     ON CONFLICT (key) DO UPDATE SET
       value = EXCLUDED.value,
@@ -96,27 +112,89 @@ export async function updateContactAction(formData: FormData) {
   redirect("/otherworld?contactSaved=1")
 }
 
-export async function updateCaptionAction(formData: FormData) {
+export async function updateArtworkAction(input: {
+  archiveNumber: number
+  imageIds: number[]
+  publishedAt: string
+  title: string
+}) {
   await requireAdmin()
-  const archiveNumber = positiveInteger(value(formData, "archiveNumber"))
-  const title = value(formData, "title")
-  const description = value(formData, "description")
+  const archiveNumber = positiveInteger(String(input.archiveNumber))
+  const title = input.title.trim()
+  const imageIds = input.imageIds.map((id) => positiveInteger(String(id)))
+  const date = new Date(input.publishedAt)
 
   if (
     !archiveNumber ||
     title.length > MAX_TITLE_LENGTH ||
-    description.length > MAX_DESCRIPTION_LENGTH
+    !input.publishedAt ||
+    Number.isNaN(date.getTime()) ||
+    !imageIds.length ||
+    imageIds.some((id) => !id) ||
+    new Set(imageIds).size !== imageIds.length
   ) {
-    redirect("/otherworld")
+    throw new Error("Artwork details are invalid.")
   }
+
+  const [artwork] = (await sql`
+    SELECT id
+    FROM artworks
+    WHERE archive_number = ${archiveNumber}
+  `) as Array<{ id: number }>
+  if (!artwork) {
+    throw new Error("Artwork was not found.")
+  }
+
+  const imageRows = (await sql`
+    SELECT id, url
+    FROM artwork_images
+    WHERE artwork_id = ${artwork.id}
+  `) as Array<{ id: number; url: string }>
+  const savedImageIds = new Set(imageRows.map((image) => Number(image.id)))
+  if (imageIds.some((imageId) => !savedImageIds.has(imageId as number))) {
+    throw new Error("Artwork images do not match the saved carousel.")
+  }
+  const removedImages = imageRows.filter(
+    (image) => !imageIds.includes(Number(image.id))
+  )
 
   await sql`
     UPDATE artworks
-    SET title = ${title}, description = ${description}, updated_at = NOW()
-    WHERE archive_number = ${archiveNumber}
+    SET
+      title = ${title},
+      description = ${title},
+      published_at = ${date.toISOString()},
+      updated_at = NOW()
+    WHERE id = ${artwork.id}
   `
+  if (removedImages.length) {
+    await del(removedImages.map((image) => image.url))
+    await Promise.all(
+      removedImages.map(
+        (image) => sql`
+        DELETE FROM artwork_images
+        WHERE id = ${image.id} AND artwork_id = ${artwork.id}
+      `
+      )
+    )
+  }
+  await sql`
+    UPDATE artwork_images
+    SET position = -position - 1
+    WHERE artwork_id = ${artwork.id}
+  `
+  await Promise.all(
+    imageIds.map(
+      (imageId, position) => sql`
+      UPDATE artwork_images
+      SET position = ${position}
+      WHERE id = ${imageId as number} AND artwork_id = ${artwork.id}
+    `
+    )
+  )
+
   revalidateArtwork(archiveNumber)
-  redirect(`/otherworld/${archiveNumber}?saved=1`)
+  return { ok: true }
 }
 
 export async function moveArtworkAction(formData: FormData) {
@@ -149,8 +227,7 @@ export async function moveArtworkAction(formData: FormData) {
     [current.sort_order]
   )
   const target = targetRows[0] as
-    | { archive_number: number; sort_order: number }
-    | undefined
+    { archive_number: number; sort_order: number } | undefined
 
   if (target) {
     await sql`
@@ -212,17 +289,12 @@ export async function changePasswordAction(formData: FormData) {
 
 export async function createArtworkDraftAction(input: {
   title: string
-  description: string
   publishedAt: string
 }) {
   await requireAdmin()
   const title = input.title.trim()
-  const description = input.description.trim()
 
-  if (
-    title.length > MAX_TITLE_LENGTH ||
-    description.length > MAX_DESCRIPTION_LENGTH
-  ) {
+  if (title.length > MAX_TITLE_LENGTH) {
     throw new Error("Artwork details are too long.")
   }
 
@@ -245,12 +317,15 @@ export async function createArtworkDraftAction(input: {
     )
     VALUES (
       ${archiveNumber}, ${`signal-${String(archiveNumber).padStart(3, "0")}`},
-      ${title}, ${description}, ${date.toISOString()}, 'draft', ${sortOrder}
+      ${title}, ${title}, ${date.toISOString()}, 'draft', ${sortOrder}
     )
     RETURNING id, archive_number
   `) as Array<{ id: number; archive_number: number }>
 
-  return { id: Number(artwork.id), archiveNumber: Number(artwork.archive_number) }
+  return {
+    id: Number(artwork.id),
+    archiveNumber: Number(artwork.archive_number),
+  }
 }
 
 export async function attachUploadedImageAction(input: {
@@ -283,13 +358,15 @@ export async function attachUploadedImageAction(input: {
   }
 
   const [artwork] = (await sql`
-    SELECT id FROM artworks WHERE id = ${artworkId} AND status = 'draft'
+    SELECT id
+    FROM artworks
+    WHERE id = ${artworkId} AND status IN ('draft', 'published')
   `) as Array<{ id: number }>
   if (!artwork) {
     throw new Error("Artwork draft was not found.")
   }
 
-  await sql`
+  const [image] = (await sql`
     INSERT INTO artwork_images (
       artwork_id, source_path, blob_path, url, alt, width, height, position
     )
@@ -297,7 +374,10 @@ export async function attachUploadedImageAction(input: {
       ${artworkId}, ${input.pathname}, ${input.pathname}, ${input.url},
       ${input.alt.trim()}, ${width}, ${height}, ${input.position}
     )
-  `
+    RETURNING id
+  `) as Array<{ id: number }>
+
+  return { id: Number(image.id) }
 }
 
 export async function publishArtworkAction(artworkIdInput: number) {

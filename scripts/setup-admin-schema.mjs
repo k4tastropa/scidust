@@ -41,6 +41,7 @@ await sql`
   INSERT INTO site_settings (key, value)
   VALUES
     ('instagram_url', 'https://www.instagram.com/scidust9/'),
+    ('behance_url', 'https://www.behance.net/scidust9'),
     ('contact_email', 'contact@scidust.com')
   ON CONFLICT (key) DO NOTHING
 `

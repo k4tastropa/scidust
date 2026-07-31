@@ -5,7 +5,7 @@ import { getContactSettings } from "@/lib/site-settings"
 
 export const metadata: Metadata = {
   title: "Contact | SCIDUST",
-  description: "Contact SCIDUST on Instagram or by email.",
+  description: "Contact SCIDUST on Instagram, Behance, or by email.",
 }
 
 export default async function ContactPage() {
@@ -96,7 +96,7 @@ export default async function ContactPage() {
               </a>
 
               <a
-                href="https://www.behance.net/scidust9"
+                href={contact.behanceUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="group flex min-h-18 touch-manipulation items-center justify-between gap-4 border-b border-[#a7e5df]/35 py-4 transition-colors duration-200 outline-none hover:text-[#f4988f] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:ring-inset motion-reduce:transition-none"
@@ -106,7 +106,9 @@ export default async function ContactPage() {
                     Behance
                   </span>
                   <span className="font-display mt-1 block text-[clamp(1.9rem,3vw,3.1rem)] leading-none tracking-[-0.05em]">
-                    @scidust9
+                    {contact.behanceUrl
+                      .replace(/^https?:\/\/(www\.)?behance\.net\//, "@")
+                      .replace(/\/$/, "")}
                   </span>
                 </span>
                 <svg

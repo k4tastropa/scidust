@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr"
 
 import {
   changePasswordAction,
@@ -7,8 +8,9 @@ import {
   moveArtworkAction,
   updateContactAction,
 } from "@/app/otherworld/actions"
+import { ArtworkDialog } from "@/components/admin/artwork-dialog"
 import { DeleteArtworkButton } from "@/components/admin/delete-artwork-button"
-import { NewArtworkForm } from "@/components/admin/new-artwork-form"
+import { PasswordInput } from "@/components/admin/password-input"
 import { requireAdmin } from "@/lib/admin-auth"
 import { getArtworks } from "@/lib/artwork"
 import { getContactSettings } from "@/lib/site-settings"
@@ -72,11 +74,11 @@ export default async function OtherworldPage({
               </p>
             </div>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#d4e9e6]/75">
-              Each file moves directly into the archive. The order you choose
-              becomes the carousel order.
+              Build each work in one focused intake. Preview every image, then
+              set the carousel order before it reaches the archive.
             </p>
             <div className="mt-7 border-t border-[#a7e5df]/20 pt-5">
-              <NewArtworkForm />
+              <ArtworkDialog />
             </div>
           </div>
 
@@ -93,6 +95,16 @@ export default async function OtherworldPage({
                     type="url"
                     required
                     defaultValue={contact.instagramUrl}
+                    className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
+                  />
+                </label>
+                <label className="grid gap-2 font-mono text-[10px] tracking-[0.14em] text-[#a7e5df] uppercase">
+                  Behance URL
+                  <input
+                    name="behanceUrl"
+                    type="url"
+                    required
+                    defaultValue={contact.behanceUrl}
                     className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none placeholder:text-[#a7e5df]/35 focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
                   />
                 </label>
@@ -122,7 +134,7 @@ export default async function OtherworldPage({
                     role="alert"
                     className="font-mono text-[10px] text-[#ff9d98]"
                   >
-                    Check the email and Instagram URL.
+                    Check the email and social URLs.
                   </p>
                 ) : null}
               </form>
@@ -135,23 +147,17 @@ export default async function OtherworldPage({
               <form action={changePasswordAction} className="mt-5 grid gap-4">
                 <label className="grid gap-2 font-mono text-[10px] tracking-[0.14em] text-[#a7e5df] uppercase">
                   Current password
-                  <input
+                  <PasswordInput
                     name="currentPassword"
-                    type="password"
                     autoComplete="current-password"
-                    required
-                    className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
                   />
                 </label>
                 <label className="grid gap-2 font-mono text-[10px] tracking-[0.14em] text-[#a7e5df] uppercase">
                   New password
-                  <input
+                  <PasswordInput
                     name="nextPassword"
-                    type="password"
                     autoComplete="new-password"
                     minLength={12}
-                    required
-                    className="min-h-12 border border-[#a7e5df]/35 bg-[#061111] px-3 font-sans text-sm tracking-normal text-[#effffd] outline-none focus:border-[#a7e5df] focus-visible:ring-2 focus-visible:ring-[#a7e5df]/45"
                   />
                 </label>
                 <button className="min-h-11 touch-manipulation justify-self-start border border-[#a7e5df]/45 px-3 font-mono text-[10px] tracking-[0.14em] text-[#a7e5df] uppercase transition-colors hover:bg-[#a7e5df] hover:text-[#061413] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:outline-none">
@@ -233,9 +239,11 @@ export default async function OtherworldPage({
                       <input type="hidden" name="direction" value="up" />
                       <button
                         disabled={index === 0}
-                        className="min-h-10 border border-[#a7e5df]/30 px-2 font-mono text-[9px] tracking-[0.1em] text-[#a7e5df] uppercase disabled:opacity-25"
+                        aria-label={`Move ${artwork.title || `archive ${artwork.id}`} earlier`}
+                        title="Move earlier"
+                        className="flex size-11 touch-manipulation items-center justify-center border border-[#a7e5df]/30 text-[#a7e5df] transition-colors hover:bg-[#a7e5df]/10 hover:text-[#effffd] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-25"
                       >
-                        Earlier
+                        <ArrowLeft aria-hidden="true" size={18} />
                       </button>
                     </form>
                     <form action={moveArtworkAction}>
@@ -247,9 +255,11 @@ export default async function OtherworldPage({
                       <input type="hidden" name="direction" value="down" />
                       <button
                         disabled={index === artworks.length - 1}
-                        className="min-h-10 border border-[#a7e5df]/30 px-2 font-mono text-[9px] tracking-[0.1em] text-[#a7e5df] uppercase disabled:opacity-25"
+                        aria-label={`Move ${artwork.title || `archive ${artwork.id}`} later`}
+                        title="Move later"
+                        className="flex size-11 touch-manipulation items-center justify-center border border-[#a7e5df]/30 text-[#a7e5df] transition-colors hover:bg-[#a7e5df]/10 hover:text-[#effffd] focus-visible:ring-2 focus-visible:ring-[#a7e5df] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-25"
                       >
-                        Later
+                        <ArrowRight aria-hidden="true" size={18} />
                       </button>
                     </form>
                     <DeleteArtworkButton archiveNumber={artwork.id} />
