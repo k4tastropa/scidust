@@ -1,15 +1,38 @@
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google"
+import { Geist, IBM_Plex_Mono } from "next/font/google"
+import localFont from "next/font/local"
 
 import "./globals.css"
+import { SiteHeader } from "@/components/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 })
 
-const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'})
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "600"],
+})
+
+const karrik = localFont({
+  src: [
+    {
+      path: "./fonts/Karrik-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Karrik-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+  ],
+  variable: "--font-display",
+  display: "swap",
+})
 
 export default function RootLayout({
   children,
@@ -20,10 +43,21 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
+      className={cn(
+        "antialiased",
+        fontSans.variable,
+        ibmPlexMono.variable,
+        karrik.variable
+      )}
     >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className="font-sans">
+        <ThemeProvider>
+          <a className="skip-link" href="#content">
+            Skip to content
+          </a>
+          <SiteHeader />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
