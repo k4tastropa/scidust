@@ -1,3 +1,4 @@
+import type { Viewport } from "next"
 import { Geist, IBM_Plex_Mono } from "next/font/google"
 import localFont from "next/font/local"
 
@@ -34,6 +35,11 @@ const karrik = localFont({
   display: "swap",
 })
 
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#051519",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,13 +49,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "antialiased",
+        "bg-[#051519] antialiased",
         fontSans.variable,
         ibmPlexMono.variable,
         karrik.variable
       )}
     >
-      <body className="font-sans">
+      <body className="bg-[#051519] font-sans">
         <a className="skip-link" href="#content">
           Skip to content
         </a>
