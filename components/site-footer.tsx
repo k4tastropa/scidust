@@ -12,7 +12,7 @@ export function SiteFooter() {
               SCIDUST / open archive
             </p>
             <p className="font-display text-[clamp(2.4rem,5vw,4.6rem)] leading-[0.8] tracking-[-0.06em] uppercase">
-              Signal stays.
+              Dust remains.
             </p>
           </div>
 
@@ -47,7 +47,7 @@ export function SiteFooter() {
         </div>
         <div className="flex min-h-14 items-center justify-between gap-5 font-mono text-[9px] font-medium tracking-[0.14em] text-[#8ce7e1]/70 uppercase sm:text-[10px]">
           <span>3D CGI / Tbilisi, GE</span>
-          <span>End of transmission</span>
+          <span>Open Archive / Ongoing</span>
         </div>
       </div>
     </footer>

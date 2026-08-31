@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { ArtworkJsonLd } from "@/components/json-ld"
 import { getArtworks } from "@/lib/artwork"
 
 type ArtworkPageProps = {
@@ -23,9 +24,47 @@ export async function generateMetadata({
     (candidate) => candidate.id === Number(id)
   )
 
+  if (!artwork) {
+    return {
+      title: "Artwork Not Found",
+    }
+  }
+
+  const mainImage = artwork.images[0]?.src
+  const ogImages = mainImage
+    ? [
+        {
+          url: mainImage,
+          width: artwork.images[0]?.width || 1200,
+          height: artwork.images[0]?.height || 630,
+          alt: artwork.images[0]?.alt || artwork.title,
+        },
+      ]
+    : []
+
+  const desc =
+    artwork.description ||
+    `${artwork.title} — 3D CGI artwork and biomechanical study by Tatia (Scidust9), 3D artist in Tbilisi, Georgia.`
+
   return {
-    title: artwork ? `${artwork.title} | SCIDUST` : "Artwork | SCIDUST",
-    description: artwork?.description,
+    title: `${artwork.title} — 3D Artwork`,
+    description: desc,
+    alternates: {
+      canonical: `/gallery/${artwork.id}`,
+    },
+    openGraph: {
+      title: `${artwork.title} | Tatia (Scidust9) 3D Art`,
+      description: desc,
+      url: `/gallery/${artwork.id}`,
+      type: "article",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${artwork.title} | Tatia (Scidust9)`,
+      description: desc,
+      images: mainImage ? [mainImage] : [],
+    },
   }
 }
 
@@ -41,6 +80,7 @@ export default async function ArtworkPage({ params }: ArtworkPageProps) {
 
   return (
     <main id="content" className="bg-[#051519] text-[#e2fffb]">
+      <ArtworkJsonLd artwork={artwork} />
       <section className="relative isolate min-h-[70svh] overflow-hidden">
         <div className="absolute inset-y-0 right-0 left-0 md:left-[35%]">
           <Image

@@ -4,8 +4,18 @@ import Image from "next/image"
 import { getContactSettings } from "@/lib/site-settings"
 
 export const metadata: Metadata = {
-  title: "Contact | SCIDUST",
-  description: "Contact SCIDUST on Instagram, Behance, or by email.",
+  title: "Contact & 3D Commissions",
+  description:
+    "Get in touch with Tatia (Scidust9) for 3D CGI art, biomechanical concept design, commercial commissions, and visual collaborations in Tbilisi, Georgia.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact & 3D Commissions | Tatia (Scidust9)",
+    description:
+      "Get in touch with Tatia (Scidust9) for 3D CGI art, concept design, and creative commissions in Tbilisi, Georgia.",
+    url: "/contact",
+  },
 }
 
 export default async function ContactPage() {
@@ -53,7 +63,7 @@ export default async function ContactPage() {
 
           <div className="mt-16 w-full pb-10 md:my-auto md:ml-auto md:w-[41%] md:pb-0">
             <p className="font-mono text-[10px] font-medium tracking-[0.18em] text-[#f4988f] uppercase sm:text-[11px]">
-              Signal received here
+              Direct channel & commissions
             </p>
             <h1 className="font-display mt-5 max-w-[8ch] text-[clamp(3.25rem,14vw,4.35rem)] leading-[0.8] tracking-[-0.065em] text-balance uppercase md:text-[clamp(3.8rem,6.8vw,7.6rem)]">
               Say
@@ -156,7 +166,7 @@ export default async function ContactPage() {
           </div>
 
           <p className="hidden font-mono text-[9px] font-medium tracking-[0.16em] text-[#a7e5df]/70 uppercase md:ml-auto md:block md:w-[41%] md:text-[10px]">
-            Every signal reaches somewhere
+            Available for worldwide projects & commissions
           </p>
         </div>
       </section>

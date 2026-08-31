@@ -1,8 +1,18 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Prints | SCIDUST",
-  description: "SCIDUST print editions are not ready yet.",
+  title: "Fine Art 3D Prints & Limited Editions",
+  description:
+    "Limited edition archival prints and physical relics of 3D artworks by Tatia (Scidust9).",
+  alternates: {
+    canonical: "/prints",
+  },
+  openGraph: {
+    title: "Fine Art 3D Prints & Limited Editions | Tatia (Scidust9)",
+    description:
+      "Limited edition archival prints and physical relics of 3D artworks by Tatia (Scidust9).",
+    url: "/prints",
+  },
 }
 
 export default function PrintsPage() {

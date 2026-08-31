@@ -4,8 +4,18 @@ import { LivingIndex } from "@/components/living-index"
 import { getArtworks } from "@/lib/artwork"
 
 export const metadata: Metadata = {
-  title: "Gallery | SCIDUST",
-  description: "The living index of SCIDUST artworks.",
+  title: "3D Art Gallery & Biomechanical Archive",
+  description:
+    "Explore the complete 3D digital art archive by Tatia (Scidust9), 3D artist in Tbilisi, Georgia. Biomechanical sculptures, surreal anatomies, and CGI concept designs.",
+  alternates: {
+    canonical: "/gallery",
+  },
+  openGraph: {
+    title: "3D Art Gallery & Biomechanical Archive | Tatia (Scidust9)",
+    description:
+      "Explore 3D digital sculptures and surreal biomechanical artworks by Tatia (Scidust9) in Tbilisi, Georgia.",
+    url: "/gallery",
+  },
 }
 
 export default async function GalleryPage() {

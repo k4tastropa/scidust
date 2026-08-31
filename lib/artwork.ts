@@ -58,9 +58,7 @@ async function getBlobArtworks(): Promise<Artwork[]> {
   const databaseUrl = process.env.DATABASE_URL
 
   if (!databaseUrl) {
-    throw new Error(
-      "DATABASE_URL is required to load the artwork archive."
-    )
+    return []
   }
 
   const sql = neon(databaseUrl)
@@ -102,7 +100,7 @@ async function getBlobArtworks(): Promise<Artwork[]> {
       id: artwork.archive_number,
       title:
         artwork.title.trim() ||
-        `Signal ${String(artwork.archive_number).padStart(2, "0")}`,
+        `Archive ${String(artwork.archive_number).padStart(2, "0")}`,
       description: descriptionExcerpt(artwork.description),
       year: yearFromDate(artwork.published_at),
       images: imagesByArtwork.get(artwork.archive_number) ?? [],

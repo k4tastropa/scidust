@@ -37,7 +37,7 @@ export default function Page() {
         <div className="relative mx-auto flex h-[calc(100svh-8.5rem)] max-w-[1600px] flex-col px-5 py-6 sm:px-8 md:h-[calc(100svh-8rem)] md:px-12 md:py-10 xl:px-16">
           <div className="flex items-start justify-between gap-8 font-mono text-[9px] font-medium tracking-[0.16em] text-[#8ce7e1] uppercase sm:text-[10px]">
             <p>3D CGI / Tbilisi, GE</p>
-            <p className="hidden text-right md:block">Signal 01 / 2025</p>
+            <p className="hidden text-right md:block">Selected Works / 2025</p>
           </div>
 
           <div className="my-auto max-w-xl py-10 md:py-20">
@@ -55,9 +55,9 @@ export default function Page() {
               human.
             </h1>
             <p className="mt-6 max-w-[32ch] text-base leading-relaxed text-pretty text-[#d9fbf8] sm:text-lg">
-              Tatia builds surreal, biomechanical worlds where skin meets
-              circuitry. Cinematic figures, metallic relics, and future myths
-              rendered in impossible light.
+              I build what’s left behind when biology and machine fuse: distorted
+              anatomies, sacred metal, and figures pulled from half-remembered
+              fever dreams.
             </p>
           </div>
         </div>
@@ -214,12 +214,12 @@ export default function Page() {
 
         <div className="relative mx-auto flex h-full max-w-[1600px] flex-col px-5 py-6 sm:px-8 md:px-12 md:py-10 xl:px-16">
           <p className="font-mono text-[9px] font-medium tracking-[0.16em] text-[#b8e4df] uppercase sm:text-[10px]">
-            Transmission complete / 03
+            Physical editions / 03
           </p>
 
           <div className="my-auto max-w-xl py-12 md:py-20">
             <p className="mb-5 font-mono text-[10px] font-medium tracking-[0.18em] text-[#35636b] uppercase sm:text-[11px]">
-              Keep a piece of the signal
+              Archival prints & relics
             </p>
             <h2
               id="collection-title"
