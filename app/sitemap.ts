@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next"
 
 import { getArtworks } from "@/lib/artwork"
 
+export const revalidate = 3600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://scidust.art"
   const artworks = await getArtworks()
