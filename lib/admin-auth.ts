@@ -1,6 +1,6 @@
 import "server-only"
 
-import { createHash, randomBytes } from "node:crypto"
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import { compare, hash } from "bcryptjs"
 import { SignJWT, jwtVerify } from "jose"
 import { cookies, headers } from "next/headers"
@@ -88,9 +88,15 @@ async function getCredential(): Promise<Credential> {
 
 async function getClientIdentifier() {
   const requestHeaders = await headers()
+  const cfIp = requestHeaders.get("cf-connecting-ip")
+  const realIp = requestHeaders.get("x-real-ip")
   const forwardedFor = requestHeaders.get("x-forwarded-for")
 
-  const clientAddress = forwardedFor?.split(",")[0]?.trim() || "unknown"
+  const clientAddress =
+    cfIp?.trim() ||
+    realIp?.trim() ||
+    forwardedFor?.split(",")[0]?.trim() ||
+    "unknown"
 
   return createHash("sha256").update(clientAddress).digest("hex")
 }
@@ -126,6 +132,15 @@ async function recordFailure(identifier: string) {
 }
 
 export async function authenticateAdmin(username: string, password: string) {
+  if (
+    !username ||
+    !password ||
+    username.length > 160 ||
+    password.length > 256
+  ) {
+    return { ok: false, reason: "invalid" as const }
+  }
+
   const credential = await getCredential()
   const identifier = await getClientIdentifier()
   const [attempt] = (await sql`
@@ -138,8 +153,13 @@ export async function authenticateAdmin(username: string, password: string) {
     return { ok: false, reason: "locked" as const }
   }
 
+  // Constant-time username comparison using SHA-256 digests
+  const userDigest = createHash("sha256").update(username).digest()
+  const expectedDigest = createHash("sha256").update(credential.username).digest()
+  const usernameMatches = timingSafeEqual(userDigest, expectedDigest)
+
   const passwordMatches = await compare(password, credential.password_hash)
-  const valid = username === credential.username && passwordMatches
+  const valid = usernameMatches && passwordMatches
 
   if (!valid) {
     await recordFailure(identifier)
